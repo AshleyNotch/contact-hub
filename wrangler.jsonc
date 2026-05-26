@@ -1,7 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "contact-hub",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  // Cloudflare Pages: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+  // in the Pages dashboard under Settings > Environment Variables.
+  // Build command: bun run build   Output directory: dist
 }
