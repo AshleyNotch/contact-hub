@@ -42,7 +42,7 @@ function CrmPage() {
             <span className="text-lg font-semibold tracking-tight">Sprrintly CRM</span>
           </div>
           <div className="flex items-center gap-2">
-            <CsvUpload onImport={add} />
+            <CsvUpload existingLeads={leads} onImport={add} onMerge={update} />
             {leads.length > 0 && (
               <Button
                 variant="ghost"
