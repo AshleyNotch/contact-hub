@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS public.leads (
 
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 
--- Allow the anon key full access (no auth in this app).
+-- Allow all roles (anon + authenticated) full access.
 CREATE POLICY "allow_all" ON public.leads
-  FOR ALL TO anon
+  FOR ALL
   USING (true)
   WITH CHECK (true);
 
