@@ -28,6 +28,7 @@ import {
   Check,
   CheckCircle2,
   ExternalLink,
+  Linkedin,
   MoreHorizontal,
   Search,
   Trash2,
@@ -71,15 +72,7 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
       if (countryFilter !== "all" && l.country !== countryFilter) return false;
       if (sourceFilter !== "all" && l.source !== sourceFilter) return false;
       if (!needle) return true;
-      return [
-        l.companyName,
-        l.email,
-        l.country,
-        l.source,
-        l.website,
-        l.founders,
-        l.notes,
-      ]
+      return [l.companyName, l.email, l.country, l.source, l.website, l.companyLinkedin, l.notes]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(needle));
     });
@@ -88,13 +81,13 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1">
+        <div className="relative min-w-[200px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search company, email, founder…"
-            className="h-10 rounded-full pl-9"
+            placeholder="Search company, email…"
+            className="h-9 rounded-full pl-9"
           />
         </div>
         <FilterSelect
@@ -115,113 +108,190 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
           placeholder="Source"
           options={[{ value: "all", label: "All sources" }, ...sources.map((c) => ({ value: c, label: c }))]}
         />
-        <div className="ml-auto text-sm text-muted-foreground">
-          {filtered.length} of {leads.length}
-        </div>
+        <span className="ml-auto text-sm text-muted-foreground tabular-nums">
+          {filtered.length} / {leads.length}
+        </span>
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead>Company</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Country</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>Founders</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[1%] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="py-16 text-center text-muted-foreground">
-                  {leads.length === 0
-                    ? "No leads yet — upload a CSV to get started."
-                    : "No leads match your filters."}
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table className="w-full min-w-[860px]">
+            <TableHeader>
+              <TableRow className="bg-muted/40 hover:bg-muted/40 border-b">
+                <TableHead className="w-10 px-3" />
+                <TableHead className="w-[180px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
+                <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Website</TableHead>
+                <TableHead className="w-10 px-2 text-center font-semibold text-xs uppercase tracking-wide text-muted-foreground">
+                  <Linkedin className="h-3.5 w-3.5 mx-auto" />
+                </TableHead>
+                <TableHead className="w-[180px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Email</TableHead>
+                <TableHead className="w-[110px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Country</TableHead>
+                <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Source</TableHead>
+                <TableHead className="w-[120px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+                <TableHead className="w-8" />
               </TableRow>
-            ) : (
-              filtered.map((l) => (
-                <TableRow key={l.id}>
-                  <TableCell className="font-medium">{l.companyName || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{l.email || "—"}</TableCell>
-                  <TableCell>{l.country || "—"}</TableCell>
-                  <TableCell>{l.source || "—"}</TableCell>
-                  <TableCell>
-                    {l.website ? (
-                      <a
-                        href={l.website.startsWith("http") ? l.website : `https://${l.website}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-foreground underline-offset-4 hover:underline"
-                      >
-                        {l.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{l.founders || "—"}</TableCell>
-                  <TableCell>
-                    <Badge className={cn("rounded-full font-medium", statusStyles[l.status])}>
-                      {STATUS_LABEL[l.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      {l.status !== "outreach_complete" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onUpdate(l.id, { status: "outreach_complete" })}
-                          className="h-8 gap-1.5"
-                          title="Mark outreach complete"
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span className="hidden md:inline">Mark done</span>
-                        </Button>
-                      )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon" variant="ghost" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          {STATUSES.map((s) => (
-                            <DropdownMenuItem
-                              key={s}
-                              onClick={() => onUpdate(l.id, { status: s })}
-                            >
-                              {l.status === s && <Check className="h-4 w-4" />}
-                              <span className={l.status === s ? "" : "ml-6"}>
-                                Set: {STATUS_LABEL[s]}
-                              </span>
-                            </DropdownMenuItem>
-                          ))}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => onRemove(l.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete lead
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="py-16 text-center text-sm text-muted-foreground">
+                    {leads.length === 0
+                      ? "No leads yet — upload a CSV to get started."
+                      : "No leads match your filters."}
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filtered.map((l) => (
+                  <LeadRow key={l.id} lead={l} onUpdate={onUpdate} onRemove={onRemove} />
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
+  );
+}
+
+function LeadRow({
+  lead: l,
+  onUpdate,
+  onRemove,
+}: {
+  lead: Lead;
+  onUpdate: Props["onUpdate"];
+  onRemove: Props["onRemove"];
+}) {
+  const done = l.status === "outreach_complete";
+
+  return (
+    <TableRow className={cn("group border-b last:border-0 transition-colors", done && "bg-muted/20")}>
+      {/* Mark done toggle */}
+      <TableCell className="px-3 py-2.5 w-10">
+        <button
+          onClick={() => onUpdate(l.id, { status: done ? "contacted" : "outreach_complete" })}
+          title={done ? "Mark as not done" : "Mark outreach complete"}
+          className={cn(
+            "flex items-center justify-center w-6 h-6 rounded-full transition-colors",
+            done
+              ? "text-[oklch(0.5_0.22_145)]"
+              : "text-muted-foreground/30 hover:text-[oklch(0.5_0.22_145)]",
+          )}
+        >
+          <CheckCircle2 className="h-5 w-5" />
+        </button>
+      </TableCell>
+
+      {/* Company */}
+      <TableCell className="py-2.5 font-medium">
+        <span className="block truncate max-w-[165px] text-sm" title={l.companyName || undefined}>
+          {l.companyName || <span className="text-muted-foreground/40">—</span>}
+        </span>
+      </TableCell>
+
+      {/* Website */}
+      <TableCell className="py-2.5">
+        {l.website ? (
+          <a
+            href={l.website.startsWith("http") ? l.website : `https://${l.website}`}
+            target="_blank"
+            rel="noreferrer"
+            title={l.website}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground max-w-[135px] group/link"
+          >
+            <ExternalLink className="h-3 w-3 shrink-0 opacity-60 group-hover/link:opacity-100" />
+            <span className="truncate">{l.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
+          </a>
+        ) : (
+          <span className="text-muted-foreground/30 text-xs">—</span>
+        )}
+      </TableCell>
+
+      {/* LinkedIn */}
+      <TableCell className="px-2 py-2.5 text-center w-10">
+        {l.companyLinkedin ? (
+          <a
+            href={l.companyLinkedin.startsWith("http") ? l.companyLinkedin : `https://${l.companyLinkedin}`}
+            target="_blank"
+            rel="noreferrer"
+            title={l.companyLinkedin}
+            className="inline-flex text-[#0A66C2] hover:opacity-70 transition-opacity"
+          >
+            <Linkedin className="h-4 w-4" />
+          </a>
+        ) : (
+          <span className="text-muted-foreground/25 text-xs">—</span>
+        )}
+      </TableCell>
+
+      {/* Email */}
+      <TableCell className="py-2.5">
+        <span
+          className="block truncate max-w-[165px] text-xs text-muted-foreground"
+          title={l.email || undefined}
+        >
+          {l.email || <span className="text-muted-foreground/30">—</span>}
+        </span>
+      </TableCell>
+
+      {/* Country */}
+      <TableCell className="py-2.5">
+        <span
+          className="block truncate max-w-[95px] text-sm"
+          title={l.country || undefined}
+        >
+          {l.country || <span className="text-muted-foreground/30 text-xs">—</span>}
+        </span>
+      </TableCell>
+
+      {/* Source */}
+      <TableCell className="py-2.5">
+        <span
+          className="block truncate max-w-[135px] text-sm"
+          title={l.source || undefined}
+        >
+          {l.source || <span className="text-muted-foreground/30 text-xs">—</span>}
+        </span>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell className="py-2.5">
+        <Badge className={cn("rounded-full text-xs font-medium px-2 py-0.5 whitespace-nowrap", statusStyles[l.status])}>
+          {STATUS_LABEL[l.status]}
+        </Badge>
+      </TableCell>
+
+      {/* Actions */}
+      <TableCell className="py-2.5 pr-2 text-right w-8">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {STATUSES.map((s) => (
+              <DropdownMenuItem key={s} onClick={() => onUpdate(l.id, { status: s })}>
+                {l.status === s && <Check className="h-4 w-4" />}
+                <span className={l.status === s ? "" : "ml-6"}>Set: {STATUS_LABEL[s]}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => onRemove(l.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete lead
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -238,7 +308,7 @@ function FilterSelect({
 }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="h-10 w-[160px] rounded-full">
+      <SelectTrigger className="h-9 w-[150px] rounded-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

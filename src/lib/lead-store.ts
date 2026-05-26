@@ -9,6 +9,7 @@ type DbLead = {
   country: string;
   source: string;
   website: string;
+  company_linkedin: string | null;
   founders: string;
   status: Status;
   notes: string | null;
@@ -23,6 +24,7 @@ function fromDb(row: DbLead): Lead {
     country: row.country,
     source: row.source,
     website: row.website,
+    companyLinkedin: row.company_linkedin ?? undefined,
     founders: row.founders,
     status: row.status,
     notes: row.notes ?? undefined,
@@ -37,6 +39,7 @@ function toDb(lead: Partial<Lead>): Partial<DbLead> {
   if (lead.country !== undefined) row.country = lead.country;
   if (lead.source !== undefined) row.source = lead.source;
   if (lead.website !== undefined) row.website = lead.website;
+  if (lead.companyLinkedin !== undefined) row.company_linkedin = lead.companyLinkedin;
   if (lead.founders !== undefined) row.founders = lead.founders;
   if (lead.status !== undefined) row.status = lead.status;
   if (lead.notes !== undefined) row.notes = lead.notes;
@@ -49,7 +52,7 @@ export function useLeads() {
   const refresh = useCallback(async () => {
     const { data } = await supabase
       .from("leads")
-      .select("id, company_name, email, country, source, website, founders, status, notes")
+      .select("id, company_name, email, country, source, website, company_linkedin, founders, status, notes")
       .order("created_at", { ascending: false });
     setLeads(((data ?? []) as DbLead[]).map(fromDb));
   }, []);

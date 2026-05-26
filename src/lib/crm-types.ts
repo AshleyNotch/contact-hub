@@ -15,6 +15,7 @@ export interface Lead {
   country: string;
   source: string;
   website: string;
+  companyLinkedin?: string;
   founders: string;
   status: Status;
   notes?: string;
@@ -28,6 +29,7 @@ const FIELD_ALIASES: Record<keyof Lead | string, string[]> = {
   country: ["country", "location", "region", "geo"],
   source: ["source", "lead source", "channel", "origin"],
   website: ["website", "site", "url", "web", "domain"],
+  companyLinkedin: ["linkedin", "company linkedin", "linkedin url", "linkedin profile", "company linkedin url"],
   founders: ["founder", "founders", "founder name", "founders details", "ceo", "owner", "contact"],
   status: ["status", "stage", "state"],
   notes: ["notes", "note", "comments", "comment", "description"],
