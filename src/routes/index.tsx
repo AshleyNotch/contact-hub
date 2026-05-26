@@ -6,7 +6,8 @@ import { CsvUpload } from "@/components/CsvUpload";
 import { LeadsTable } from "@/components/LeadsTable";
 import { useLeads } from "@/lib/lead-store";
 import { STATUS_LABEL, type Status } from "@/lib/crm-types";
-import { Trash2 } from "lucide-react";
+import { LogOut, Trash2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   component: CrmPage,
@@ -54,6 +55,14 @@ function CrmPage() {
                 Clear all
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => supabase.auth.signOut()}
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>

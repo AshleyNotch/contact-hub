@@ -4,9 +4,12 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 import appCss from "../styles.css?url";
 
@@ -110,6 +113,29 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [ready, setReady] = useState(false);
+  const navigate = useNavigate();
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const path = router.state.location.pathname;
+      if (!data.session && path !== "/login") {
+        navigate({ to: "/login", replace: true });
+      } else if (data.session && path === "/login") {
+        navigate({ to: "/" });
+      }
+      setReady(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") navigate({ to: "/login", replace: true });
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!ready) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
