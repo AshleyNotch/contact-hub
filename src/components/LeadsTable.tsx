@@ -25,6 +25,9 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Check,
   CheckCircle2,
   ExternalLink,
@@ -50,11 +53,21 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
+type SortField = "companyName" | "email" | "country" | "source" | "status";
+type SortDir = "asc" | "desc";
+
 export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<SortField>("companyName");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function handleSort(field: SortField) {
+    if (field === sortField) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortField(field); setSortDir("asc"); }
+  }
 
   const countries = useMemo(
     () => Array.from(new Set(leads.map((l) => l.country).filter(Boolean))).sort(),
@@ -67,7 +80,7 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
 
   const filtered = useMemo(() => {
     const needle = q.toLowerCase().trim();
-    return leads.filter((l) => {
+    const result = leads.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
       if (countryFilter !== "all" && l.country !== countryFilter) return false;
       if (sourceFilter !== "all" && l.source !== sourceFilter) return false;
@@ -76,7 +89,13 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(needle));
     });
-  }, [leads, q, statusFilter, countryFilter, sourceFilter]);
+    result.sort((a, b) => {
+      const av = (a[sortField] ?? "").toLowerCase();
+      const bv = (b[sortField] ?? "").toLowerCase();
+      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+    return result;
+  }, [leads, q, statusFilter, countryFilter, sourceFilter, sortField, sortDir]);
 
   return (
     <div className="space-y-4">
@@ -119,15 +138,15 @@ export function LeadsTable({ leads, onUpdate, onRemove }: Props) {
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40 border-b">
                 <TableHead className="w-10 px-3" />
-                <TableHead className="w-[180px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
+                <SortHead label="Company" field="companyName" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[180px]" />
                 <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Website</TableHead>
                 <TableHead className="w-10 px-2 text-center font-semibold text-xs uppercase tracking-wide text-muted-foreground">
                   <Linkedin className="h-3.5 w-3.5 mx-auto" />
                 </TableHead>
-                <TableHead className="w-[180px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Email</TableHead>
-                <TableHead className="w-[110px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Country</TableHead>
-                <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Source</TableHead>
-                <TableHead className="w-[120px] font-semibold text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+                <SortHead label="Email" field="email" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[180px]" />
+                <SortHead label="Country" field="country" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[110px]" />
+                <SortHead label="Source" field="source" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[150px]" />
+                <SortHead label="Status" field="status" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[120px]" />
                 <TableHead className="w-8" />
               </TableRow>
             </TableHeader>
@@ -292,6 +311,39 @@ function LeadRow({
         </DropdownMenu>
       </TableCell>
     </TableRow>
+  );
+}
+
+function SortHead({
+  label,
+  field,
+  sortField,
+  sortDir,
+  onSort,
+  className,
+}: {
+  label: string;
+  field: SortField;
+  sortField: SortField;
+  sortDir: SortDir;
+  onSort: (f: SortField) => void;
+  className?: string;
+}) {
+  const active = field === sortField;
+  return (
+    <TableHead className={cn("font-semibold text-xs uppercase tracking-wide text-muted-foreground", className)}>
+      <button
+        onClick={() => onSort(field)}
+        className="flex items-center gap-1 hover:text-foreground transition-colors"
+      >
+        {label}
+        {active ? (
+          sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-40" />
+        )}
+      </button>
+    </TableHead>
   );
 }
 
