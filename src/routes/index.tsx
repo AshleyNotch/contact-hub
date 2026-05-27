@@ -8,6 +8,7 @@ import { useLeads } from "@/lib/lead-store";
 import { STATUS_LABEL, type Status } from "@/lib/crm-types";
 import { LogOut, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import logoUrl from "@/assets/logo.avif?url";
 
 export const Route = createFileRoute("/")({
   component: CrmPage,
@@ -36,9 +37,7 @@ function CrmPage() {
       <header className="border-b">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-[oklch(0.86_0.22_145)]">
-              <span className="text-sm font-bold text-black">≡</span>
-            </div>
+            <img src={logoUrl} alt="Sprrintly" className="h-8 w-8 rounded-full object-cover" />
             <span className="text-lg font-semibold tracking-tight">Sprrintly CRM</span>
           </div>
           <div className="flex items-center gap-2">
